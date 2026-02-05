@@ -5,18 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Il Tuo Posto Online</title>
 <style>
-body { font-family: 'Arial', sans-serif; margin:0; background:#f0f2f5; }
-header { background:#ff6f61; color:white; padding:20px; text-align:center; }
-header h1 { margin:0; }
+body { font-family:'Arial', sans-serif; margin:0; background:#f4f4f9; }
+header { background:#ff6f61; color:white; padding:25px 10px; text-align:center; }
+header h1 { margin:0; font-size:28px; }
 header p { margin:5px 0 0 0; font-size:16px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; padding:20px; }
-.box { background:white; padding:10px; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.1); display:flex; flex-direction:column; justify-content:space-between; }
-.box img { max-width:100%; border-radius:6px; margin-bottom:5px; }
-.box h4 { margin:5px 0; color:#333; }
-.box p { font-size:14px; color:#555; }
-.box a { text-decoration:none; color:#ff6f61; font-weight:bold; }
-.pagination { text-align:center; margin:20px 0; }
-.page-btn { margin:0 5px; cursor:pointer; padding:5px 10px; border-radius:5px; border:none; background:#ddd; }
+
+.container { max-width:1100px; margin:20px auto; padding:0 20px; }
+
+.add-ad-form { background:white; padding:20px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1); margin-bottom:30px; }
+.add-ad-form h2 { margin-top:0; color:#333; }
+.add-ad-form input, .add-ad-form textarea { width:100%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
+.add-ad-form button { padding:12px 20px; border:none; border-radius:5px; background:#ff6f61; color:white; font-weight:bold; cursor:pointer; }
+
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
+.box { background:white; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); overflow:hidden; display:flex; flex-direction:column; transition:transform 0.2s; }
+.box:hover { transform:translateY(-5px); }
+.box img { width:100%; height:150px; object-fit:cover; }
+.box-content { padding:10px; flex-grow:1; display:flex; flex-direction:column; }
+.box-content h4 { margin:0 0 5px 0; color:#333; font-size:18px; }
+.box-content p { margin:0 0 10px 0; font-size:14px; color:#555; flex-grow:1; }
+.box-content a { text-decoration:none; color:#ff6f61; font-weight:bold; }
+.pagination { text-align:center; margin:25px 0; }
+.page-btn { margin:0 5px; cursor:pointer; padding:6px 12px; border-radius:5px; border:none; background:#ddd; }
 .page-btn.active { background:#ff6f61; color:white; }
 </style>
 
@@ -43,6 +53,33 @@ let currentPage = 1;
 const adsPerPage = 10;
 let allAds = [];
 
+// 🔹 Funzione aggiungi annuncio
+async function addAd(){
+  const title = document.getElementById('adTitle').value;
+  const text = document.getElementById('adText').value;
+  const link = document.getElementById('adLink').value;
+  const imageFile = document.getElementById('adImage').files[0];
+
+  if(!title || !text){ alert("Titolo e testo obbligatori"); return; }
+
+  let imageUrl = "";
+  if(imageFile){
+    const ref = storage.ref().child('images/'+Date.now()+'-'+imageFile.name);
+    await ref.put(imageFile);
+    imageUrl = await ref.getDownloadURL();
+  }
+
+  await db.collection('ads').add({
+    title, text, link, image: imageUrl,
+    status: "pending",
+    created: Date.now()
+  });
+
+  alert("Annuncio inviato! Appena approvato apparirà sul sito.");
+  document.getElementById('adForm').reset();
+  loadAds();
+}
+
 // 🔹 Carica annunci approvati
 async function loadAds(){
   const grid = document.getElementById('adGrid');
@@ -59,7 +96,7 @@ function showPage(page){
   grid.innerHTML="";
 
   const start = (page-1)*adsPerPage;
-  const end = start + adsPerPage;
+  const end = start+adsPerPage;
   const pageAds = allAds.slice(start,end);
 
   pageAds.forEach(ad=>{
@@ -67,9 +104,11 @@ function showPage(page){
     div.className="box";
     div.innerHTML=`
       ${ad.image ? `<img src="${ad.image}">` : ''}
-      <h4>${ad.title}</h4>
-      <p>${ad.text}</p>
-      ${ad.link ? `<a href="${ad.link}" target="_blank">Vai al link</a>` : ''}
+      <div class="box-content">
+        <h4>${ad.title}</h4>
+        <p>${ad.text}</p>
+        ${ad.link ? `<a href="${ad.link}" target="_blank">Vai al link</a>` : ''}
+      </div>
     `;
     grid.appendChild(div);
   });
@@ -94,14 +133,30 @@ window.onload = loadAds;
 <body>
 <header>
 <h1>Il Tuo Posto Online</h1>
-<p>Visualizza gli annunci gratuiti degli utenti</p>
+<p>Pubblica e scopri annunci gratuiti come Subito.it o Vinted</p>
 </header>
-<main>
+<div class="container">
+
+<!-- FORM PUBBLICO PER AGGIUNGERE ANNUNCIO -->
+<div class="add-ad-form">
+<h2>Aggiungi il tuo annuncio gratis</h2>
+<form id="adForm" onsubmit="event.preventDefault(); addAd();">
+<input type="text" id="adTitle" placeholder="Titolo annuncio" required>
+<textarea id="adText" placeholder="Descrizione annuncio" required></textarea>
+<input type="text" id="adLink" placeholder="Link (facoltativo)">
+<input type="file" id="adImage">
+<button type="submit">Invia annuncio</button>
+</form>
+</div>
+
+<!-- GRIGLIA ANNUNCI -->
 <div class="grid" id="adGrid"></div>
 <div class="pagination" id="pagination"></div>
-</main>
+
+</div>
 </body>
 </html>
+
 
 
 
