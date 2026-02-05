@@ -9,14 +9,14 @@
 body {
   font-family:'Arial', sans-serif;
   margin:0;
-  background: url('https://images.unsplash.com/photo-1612831455549-31f9a5be5dc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxNjA3fDB8MHwxfHNlYXJjaHwzfHxjdWJlJTIwcmViaXglMjBzaWdufGVufDB8fHx8MTY4NTYyMTA3OA&ixlib=rb-4.0.3&q=80&w=1080') center/cover no-repeat;
+  background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080') center/cover no-repeat;
 }
 
 /* --- HERO SECTION --- */
 header {
   height: 60vh;
   background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
-              url('https://images.unsplash.com/photo-1601758123927-3e20eddf007c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxNjA3fDB8MHwxfHNlYXJjaHwxfHxjdWJlJTIwcmViaXglMjBwb3N0ZXJ8ZW58MHx8fHwxNjg1NjIxMDc4&ixlib=rb-4.0.3&q=80&w=1080') center/cover no-repeat;
+              url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080') center/cover no-repeat;
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -107,7 +107,6 @@ async function addAd(){
 
   await db.collection('ads').add({
     title, text, link, image: imageUrl,
-    status: "approved",
     created: Date.now()
   });
 
@@ -116,15 +115,21 @@ async function addAd(){
   loadAds();
 }
 
-// 🔹 CARICA ANNUNCI
+// 🔹 CARICA ANNUNCI – versione semplice senza where
 async function loadAds(){
   const grid = document.getElementById('adGrid');
   grid.innerHTML="";
 
-  const snapshot = await db.collection('ads').where('status','==','approved').orderBy('created','desc').get();
-  allAds = snapshot.docs.map(doc => ({id:doc.id, ...doc.data()}));
-  showPage(currentPage);
-  renderPagination();
+  try {
+    const snapshot = await db.collection('ads').orderBy('created','desc').get();
+    allAds = snapshot.docs.map(doc => ({id:doc.id, ...doc.data()}));
+    currentPage = 1;
+    showPage(currentPage);
+    renderPagination();
+  } catch(error){
+    console.error("Errore caricando gli annunci:", error);
+    grid.innerHTML="<p style='color:red'>Non è stato possibile caricare gli annunci. Controlla le regole Firebase.</p>";
+  }
 }
 
 function showPage(page){
