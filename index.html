@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -7,12 +6,16 @@
 <title>Il Tuo Posto Online</title>
 <style>
 /* --- BODY & FONT --- */
-body { font-family:'Arial', sans-serif; margin:0; background:#f4f4f9; }
+body {
+  font-family:'Arial', sans-serif;
+  margin:0;
+  background: url('https://images.unsplash.com/photo-1612831455549-31f9a5be5dc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxNjA3fDB8MHwxfHNlYXJjaHwzfHxjdWJlJTIwcmViaXglMjBzaWdufGVufDB8fHx8MTY4NTYyMTA3OA&ixlib=rb-4.0.3&q=80&w=1080') center/cover no-repeat;
+}
 
 /* --- HERO SECTION --- */
 header {
   height: 60vh;
-  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+  background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
               url('https://images.unsplash.com/photo-1601758123927-3e20eddf007c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxNjA3fDB8MHwxfHNlYXJjaHwxfHxjdWJlJTIwcmViaXglMjBwb3N0ZXJ8ZW58MHx8fHwxNjg1NjIxMDc4&ixlib=rb-4.0.3&q=80&w=1080') center/cover no-repeat;
   display:flex;
   flex-direction:column;
@@ -32,7 +35,7 @@ header h1 {
 
 /* --- FORM PUBBLICO --- */
 .add-ad-form {
-  background:white;
+  background:rgba(255,255,255,0.95);
   padding:20px;
   border-radius:10px;
   box-shadow:0 3px 10px rgba(0,0,0,0.1);
@@ -82,7 +85,7 @@ let currentPage = 1;
 const adsPerPage = 10;
 let allAds = [];
 
-// 🔹 AGGIUNGI ANNUNCIO PUBBLICO CON IMMAGINE
+// 🔹 AGGIUNGI ANNUNCIO PUBBLICO CON IMMAGINE FINO 5MB
 async function addAd(){
   const title = document.getElementById('adTitle').value;
   const text = document.getElementById('adText').value;
@@ -104,7 +107,7 @@ async function addAd(){
 
   await db.collection('ads').add({
     title, text, link, image: imageUrl,
-    status: "approved", // direttamente visibile
+    status: "approved",
     created: Date.now()
   });
 
