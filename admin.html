@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Il Tuo Posto Online</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; background:#f9f9f9; }
+header { background:#2196F3; color:white; padding:20px; text-align:center; }
+header h1 { margin:0; }
+.container { max-width:1000px; margin:20px auto; padding:0 20px; }
+.login-form { background:white; padding:20px; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.1); max-width:400px; margin:auto; text-align:center; }
+.login-form input { width:90%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
+.login-form button { padding:10px 20px; border:none; border-radius:5px; background:#2196F3; color:white; font-weight:bold; cursor:pointer; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; margin-top:20px; }
+.box { background:white; padding:10px; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.1); display:flex; flex-direction:column; justify-content:space-between; }
+.box img { max-width:100%; border-radius:6px; margin-bottom:5px; }
+.box h4 { margin:5px 0; color:#333; }
+.box p { font-size:14px; color:#555; }
+.box a { text-decoration:none; color:#2196F3; font-weight:bold; }
+button.box-btn { margin-top:5px; padding:5px 10px; border:none; border-radius:5px; background:#2196F3; color:white; font-weight:bold; cursor:pointer; }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+<script>
+// 🔹 FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyCUROdEnMoABumEoYMheN-8x2w-CWfc1GQ",
+  authDomain: "il-tuo-posto-online.firebaseapp.com",
+  projectId: "il-tuo-posto-online",
+  storageBucket: "il-tuo-posto-online.firebasestorage.app",
+  messagingSenderId: "640085287509",
+  appId: "1:640085287509:web:718a44398dd2050ad92adc",
+  measurementId: "G-J56VHZ59KG"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
+const auth = firebase.auth();
+
+// 🔹 LOGIN FORM
+function loginAdmin(){
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  auth.signInWithEmailAndPassword(email,password)
+  .then(() => {
+    document.getElementById('loginDiv').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    loadAds();
+  })
+  .catch(e => alert("Errore login: "+e.message));
+}
+
+// 🔹 LOGOUT
+function logoutAdmin(){
+  auth.signOut().then(()=>{
+    document.getElementById('adminPanel').style.display='none';
+    document.getElementById('loginDiv').style.display='block';
+  });
+}
+
+// 🔹 CARICA ANNUNCIO MANUALE
+async function submitAd(){
+  const title = prompt("Titolo annuncio:");
+  const text = prompt("Testo annuncio:");
+  const link = prompt("Link (facoltativo):");
+  const imageFile = document.getElementById('imageInput').files[0];
+  let imageUrl = "";
+  if(imageFile){
+    const ref = storage.ref().child('images/'+Date.now()+'-'+imageFile.name);
+    await ref.put(imageFile);
+    imageUrl = await ref.getDownloadURL();
+  }
+  await db.collection('ads').add({
+    title,
+    text,
+    link,
+    image: imageUrl,
+    status: "approved",
+    created: Date.now()
+  });
+  alert("Annuncio pubblicato!");
+  loadAds();
+}
+
+// 🔹 CARICA TUTTI GLI ANNUNCI
+async function loadAds(){
+  const grid = document.getElementById('adminGrid');
+  grid.innerHTML="";
+  const snapshot = await db.collection('ads').orderBy('created','desc').get();
+  snapshot.forEach(doc=>{
+    const ad = doc.data();
+    const div = document.createElement('div');
+    div.className="box";
+    div.innerHTML = `
+      ${ad.image ? `<img src="${ad.image}">` : ''}
+      <h4>${ad.title}</h4>
+      <p>${ad.text}</p>
+      ${ad.link ? `<a href="${ad.link}" target="_blank">Link</a>` : ''}
+      <p>Status: ${ad.status}</p>
+      <button class="box-btn" onclick="approveAd('${doc.id}')">Approva</button>
+      <button class="box-btn" onclick="deleteAd('${doc.id}')">Elimina</button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+// 🔹 FUNZIONI ADMIN
+async function approveAd(id){
+  await db.collection('ads').doc(id).update({status:'approved'});
+  loadAds();
+}
+async function deleteAd(id){
+  await db.collection('ads').doc(id).delete();
+  loadAds();
+}
+
+</script>
+</head>
+<body>
+<header>
+<h1>Admin - Il Tuo Posto Online</h1>
+</header>
+<div class="container">
+
+  <!-- FORM LOGIN -->
+  <div id="loginDiv" class="login-form">
+    <h3>Login Admin</h3>
+    <input type="email" id="email" placeholder="Email"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="loginAdmin()">Accedi</button>
+  </div>
+
+  <!-- PANNELLO ADMIN -->
+  <div id="adminPanel" style="display:none;">
+    <button onclick="logoutAdmin()">Logout</button>
+    <input type="file" id="imageInput">
+    <button onclick="submitAd()">Pubblica annuncio manualmente</button>
+    <div class="grid" id="adminGrid"></div>
+  </div>
+
+</div>
+</body>
+</html>
