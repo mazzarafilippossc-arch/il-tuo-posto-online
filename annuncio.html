@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annuncio</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: black;
+  color: #00ff88;
+  padding: 30px;
+}
+a { color: #00ff88; }
+img {
+  max-width: 100%;
+  border: 1px solid #00ff88;
+  margin: 20px 0;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCUROdEnMoABumEoYMheN-8x2w-CWfc1GQ",
+  authDomain: "il-tuo-posto-online.firebaseapp.com",
+  projectId: "il-tuo-posto-online",
+  messagingSenderId: "640085287509",
+  appId: "1:640085287509:web:718a44398dd2050ad92adc"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const id = new URLSearchParams(window.location.search).get("id");
+
+async function carica() {
+  const doc = await db.collection("ads").doc(id).get();
+  if (!doc.exists) return;
+
+  const a = doc.data();
+  document.getElementById("contenuto").innerHTML = `
+    <h1>${a.title}</h1>
+    ${a.image ? `<img src="${a.image}">` : ""}
+    <p>${a.text}</p>
+    ${a.link ? `<p><a href="${a.link}" target="_blank">Vai al link</a></p>` : ""}
+  `;
+}
+
+window.onload = carica;
+</script>
+</head>
+
+<body>
+
+<div id="contenuto"></div>
+
+</body>
+</html>
