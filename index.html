@@ -1,90 +1,8 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Il tuo posto online</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f0f0f0 url('https://i.imgur.com/6pJr1fV.jpg') no-repeat center top;
-      background-size: cover;
-    }
-    header {
-      background-color: rgba(255, 255, 255, 0.8);
-      text-align: center;
-      padding: 40px 20px;
-    }
-    header h1 {
-      font-size: 2em;
-      color: #333;
-      margin: 0;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 15px;
-      padding: 20px;
-      max-width: 1200px;
-      margin: auto;
-    }
-    .card {
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 15px;
-      text-align: center;
-    }
-    .rules {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      font-size: 0.95em;
-      line-height: 1.5em;
-    }
-    .rules h2 {
-      margin-top: 0;
-    }
-    button {
-      padding: 10px 15px;
-      font-size: 1em;
-      border: none;
-      border-radius: 6px;
-      background-color: #1e90ff;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0d6efd;
-    }
-  </style>
-</head>
-<body>
+<!-- GRIGLIA ANNUNCI -->
+<div class="grid" id="adGrid"></div>
+<div class="pagination" id="pagination"></div>
 
-<header>
-  <h1>Il tuo posto online</h1>
-</header>
-
-<section class="grid" id="adGrid">
-  <!-- Esempio annunci -->
-  <div class="card">
-    <h3>Annuncio 1</h3>
-    <p>Descrizione breve</p>
-    <p>Prezzo: €2,50</p>
-  </div>
-  <div class="card">
-    <h3>Annuncio 2</h3>
-    <p>Descrizione breve</p>
-    <p>Prezzo: €2,50</p>
-  </div>
-  <!-- Gli annunci reali si aggiungeranno dinamicamente -->
-</section>
-
-<!-- Banner Adsterra -->
+<!-- BANNER ADSTERRA -->
 <div style="text-align:center; margin:40px 0;">
   <script>
     atOptions = {
@@ -98,11 +16,9 @@
   <script src="https://www.highperformanceformat.com/a9b3b799500d579fab35d6eca886645c/invoke.js"></script>
 </div>
 
-<section class="rules">
-  <h2>Regole del sito</h2>
-  <p>È vietato pubblicare contenuti illegali, offensivi o protetti da copyright senza autorizzazione. Tutti gli annunci devono rispettare le leggi vigenti. Gli amministratori si riservano il diritto di rimuovere qualsiasi contenuto che violi queste regole.</p>
-</section>
-
-</body>
-</html>
-
+<!-- REGOLE SITO -->
+<div class="rules">
+  <strong>Regole del sito:</strong> <br>
+  È vietato pubblicare contenuti illegali, offensivi, diffamatori o in violazione di copyright. <br>
+  Tutti gli annunci pubblicati sono di responsabilità dell’utente, ma ci riserviamo di rimuovere qualsiasi contenuto inappropriato.
+</div>
