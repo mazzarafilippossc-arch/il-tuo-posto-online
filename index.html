@@ -61,6 +61,7 @@ let currentPage = 1;
 const adsPerPage = 10;
 let allAds = [];
 
+// 🔹 PUBBLICA ANNUNCIO
 async function addAd(){
   const title = document.getElementById('adTitle').value;
   const text = document.getElementById('adText').value;
@@ -88,6 +89,7 @@ async function addAd(){
   loadAds();
 }
 
+// 🔹 CARICA ANNUNCI
 async function loadAds(){
   const grid = document.getElementById('adGrid');
   grid.innerHTML="";
@@ -140,6 +142,7 @@ window.onload = loadAds;
 </header>
 
 <div class="container">
+  <!-- FORM PUBBLICO -->
   <div class="add-ad-form">
     <h2>Aggiungi il tuo annuncio gratis</h2>
     <form id="adForm" onsubmit="event.preventDefault(); addAd();">
@@ -151,23 +154,11 @@ window.onload = loadAds;
     </form>
   </div>
 
+  <!-- GRIGLIA ANNUNCI -->
   <div class="grid" id="adGrid"></div>
   <div class="pagination" id="pagination"></div>
 
-  <!-- BANNER ADSTERRA -->
-  <div style="text-align:center; margin:40px 0;">
-    <script type="text/javascript">
-	atOptions = {
-		'key' :  'a9b3b799500d579fab35d6eca886645c', // <--- inserisci qui la tua key Adsterra
-		'format' : 'iframe',
-		'height' : 250,
-		'width' : 300,
-		'params' : {}
-	};
-    </script>
-    <script type="text/javascript" src="//www.adsterra.com/ads.js"></script>
-  </div>
-
+  <!-- REGOLE SITO -->
   <div class="rules">
     <strong>Regole del sito:</strong><br>
     È vietato pubblicare contenuti illegali, offensivi, diffamatori o in violazione di copyright.<br>
@@ -176,4 +167,3 @@ window.onload = loadAds;
 </div>
 </body>
 </html>
-
