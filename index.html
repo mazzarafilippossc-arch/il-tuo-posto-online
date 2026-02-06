@@ -1,24 +1,203 @@
-<!-- GRIGLIA ANNUNCI -->
-<div class="grid" id="adGrid"></div>
-<div class="pagination" id="pagination"></div>
+ <!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Tuo Posto Online</title>
+<style>
+/* --- BODY & FONT --- */
+body { font-family:'Arial', sans-serif; margin:0; background:#f4f4f9; }
 
-<!-- BANNER ADSTERRA -->
-<div style="text-align:center; margin:40px 0;">
-  <script>
-    atOptions = {
-      'key' : 'a9b3b799500d579fab35d6eca886645c',
-      'format' : 'iframe',
-      'height' : 250,
-      'width' : 300,
-      'params' : {}
-    };
-  </script>
-  <script src="https://www.highperformanceformat.com/a9b3b799500d579fab35d6eca886645c/invoke.js"></script>
-</div>
+/* --- HERO SECTION --- */
+header {
+  height: 60vh;
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+              url('https://images.unsplash.com/photo-1601758123927-3e20eddf007c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxNjA3fDB8MHwxfHNlYXJjaHwxfHxjdWJlJTIwcmViaXglMjBwb3N0ZXJ8ZW58MHx8fHwxNjg1NjIxMDc4&ixlib=rb-4.0.3&q=80&w=1080') center/cover no-repeat;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  color:white;
+  text-align:center;
+}
+header h1 {
+  font-size:2.5rem;
+  margin:0;
+  text-shadow:2px 2px 10px rgba(0,0,0,0.5);
+}
 
-<!-- REGOLE SITO -->
-<div class="rules">
-  <strong>Regole del sito:</strong> <br>
-  È vietato pubblicare contenuti illegali, offensivi, diffamatori o in violazione di copyright. <br>
-  Tutti gli annunci pubblicati sono di responsabilità dell’utente, ma ci riserviamo di rimuovere qualsiasi contenuto inappropriato.
+/* --- CONTAINER --- */
+.container { max-width:1100px; margin:20px auto; padding:0 20px; }
+
+/* --- FORM PUBBLICO --- */
+.add-ad-form {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.1);
+  margin-bottom:30px;
+}
+.add-ad-form h2 { margin-top:0; color:#333; }
+.add-ad-form input, .add-ad-form textarea { width:100%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
+.add-ad-form button { padding:12px 20px; border:none; border-radius:5px; background:#ff6f61; color:white; font-weight:bold; cursor:pointer; }
+<script>
+  atOptions = {
+    'key' : 'a9b3b799500d579fab35d6eca886645c',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/a9b3b799500d579fab35d6eca886645c/invoke.js"></script>
+/* --- GRIGLIA ANNUNCI --- */
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
+.box { background:white; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); overflow:hidden; display:flex; flex-direction:column; transition:transform 0.2s; }
+.box:hover { transform:translateY(-5px); }
+.box img { width:100%; height:150px; object-fit:cover; }
+.box-content { padding:10px; flex-grow:1; display:flex; flex-direction:column; }
+.box-content h4 { margin:0 0 5px 0; color:#333; font-size:18px; }
+.box-content p { margin:0 0 10px 0; font-size:14px; color:#555; flex-grow:1; }
+.box-content a { text-decoration:none; color:#ff6f61; font-weight:bold; }
+.pagination { text-align:center; margin:25px 0; }
+.page-btn { margin:0 5px; cursor:pointer; padding:6px 12px; border-radius:5px; border:none; background:#ddd; }
+.page-btn.active { background:#ff6f61; color:white; }
+
+/* --- REGOLE SITO --- */
+.rules { margin:40px 0; background:#fff4f4; padding:15px; border-radius:8px; color:#333; font-size:14px; border:1px solid #ff6f61; }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+
+<script>
+// 🔹 CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyCUROdEnMoABumEoYMheN-8x2w-CWfc1GQ",
+  authDomain: "il-tuo-posto-online.firebaseapp.com",
+  projectId: "il-tuo-posto-online",
+  storageBucket: "il-tuo-posto-online.firebasestorage.app",
+  messagingSenderId: "640085287509",
+  appId: "1:640085287509:web:718a44398dd2050ad92adc",
+  measurementId: "G-J56VHZ59KG"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+let currentPage = 1;
+const adsPerPage = 10;
+let allAds = [];
+
+// 🔹 AGGIUNGI ANNUNCIO PUBBLICO CON IMMAGINE
+async function addAd(){
+  const title = document.getElementById('adTitle').value;
+  const text = document.getElementById('adText').value;
+  const link = document.getElementById('adLink').value;
+  const imageFile = document.getElementById('adImage').files[0];
+
+  if(!title || !text){ alert("Titolo e testo obbligatori"); return; }
+
+  let imageUrl = "";
+  if(imageFile){
+    if(imageFile.size > 5*1024*1024){ // 5 MB
+      alert("Immagine troppo grande! Max 5 MB");
+      return;
+    }
+    const ref = storage.ref().child('images/'+Date.now()+'-'+imageFile.name);
+    await ref.put(imageFile);
+    imageUrl = await ref.getDownloadURL();
+  }
+
+  await db.collection('ads').add({
+    title, text, link, image: imageUrl,
+    status: "approved", // direttamente visibile
+    created: Date.now()
+  });
+
+  alert("Annuncio pubblicato!");
+  document.getElementById('adForm').reset();
+  loadAds();
+}
+
+// 🔹 CARICA ANNUNCI
+async function loadAds(){
+  const grid = document.getElementById('adGrid');
+  grid.innerHTML="";
+
+  const snapshot = await db.collection('ads').where('status','==','approved').orderBy('created','desc').get();
+  allAds = snapshot.docs.map(doc => ({id:doc.id, ...doc.data()}));
+  showPage(currentPage);
+  renderPagination();
+}
+
+function showPage(page){
+  const grid = document.getElementById('adGrid');
+  grid.innerHTML="";
+  const start = (page-1)*adsPerPage;
+  const end = start+adsPerPage;
+  const pageAds = allAds.slice(start,end);
+
+  pageAds.forEach(ad=>{
+    const div = document.createElement('div');
+    div.className="box";
+    div.innerHTML=`
+      ${ad.image ? `<img src="${ad.image}">` : ''}
+      <div class="box-content">
+        <h4>${ad.title}</h4>
+        <p>${ad.text}</p>
+        ${ad.link ? `<a href="${ad.link}" target="_blank">Vai al link</a>` : ''}
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function renderPagination(){
+  const pagDiv = document.getElementById('pagination');
+  pagDiv.innerHTML="";
+  const totalPages = Math.ceil(allAds.length/adsPerPage);
+  for(let i=1;i<=totalPages;i++){
+    const btn = document.createElement('button');
+    btn.textContent=i;
+    btn.className='page-btn'+(i===currentPage?' active':'');
+    btn.onclick=()=>{currentPage=i; showPage(i); renderPagination();}
+    pagDiv.appendChild(btn);
+  }
+}
+
+window.onload = loadAds;
+</script>
+</head>
+<body>
+<header>
+  <h1>Il Tuo Posto Online</h1>
+</header>
+
+<div class="container">
+  <!-- FORM PUBBLICO -->
+  <div class="add-ad-form">
+    <h2>Aggiungi il tuo annuncio gratis</h2>
+    <form id="adForm" onsubmit="event.preventDefault(); addAd();">
+      <input type="text" id="adTitle" placeholder="Titolo annuncio" required>
+      <textarea id="adText" placeholder="Descrizione annuncio" required></textarea>
+      <input type="text" id="adLink" placeholder="Link (facoltativo)">
+      <input type="file" id="adImage" accept="image/*">
+      <button type="submit">Pubblica annuncio</button>
+    </form>
+  </div>
+
+  <!-- GRIGLIA ANNUNCI -->
+  <div class="grid" id="adGrid"></div>
+  <div class="pagination" id="pagination"></div>
+
+  <!-- REGOLE SITO -->
+  <div class="rules">
+    <strong>Regole del sito:</strong> <br>
+    È vietato pubblicare contenuti illegali, offensivi, diffamatori o in violazione di copyright. <br>
+    Tutti gli annunci pubblicati sono di responsabilità dell’utente, ma ci riserviamo di rimuovere qualsiasi contenuto inappropriato.
+  </div>
 </div>
+</body>
+</html>
