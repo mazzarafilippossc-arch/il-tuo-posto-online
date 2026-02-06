@@ -67,7 +67,7 @@ let currentPage = 1;
 const adsPerPage = 10;
 let allAds = [];
 
-// PUBBLICA ANNUNCIO
+// FUNZIONE PUBBLICA ANNUNCIO CON IMMAGINE
 async function addAd(){
   const title = document.getElementById('adTitle').value;
   const text = document.getElementById('adText').value;
@@ -79,9 +79,17 @@ async function addAd(){
   let imageUrl = "";
   if(imageFile){
     if(imageFile.size > 5*1024*1024){ alert("Immagine troppo grande! Max 5 MB"); return; }
-    const ref = storage.ref().child('images/'+Date.now()+'-'+imageFile.name);
-    await ref.put(imageFile);
-    imageUrl = await ref.getDownloadURL();
+
+    const timestamp = Date.now();
+    const fileName = `images/${timestamp}_${imageFile.name}`;
+    const ref = storage.ref(fileName);
+    try{
+      await ref.put(imageFile);
+      imageUrl = await ref.getDownloadURL();
+    } catch(err){
+      alert("Errore caricamento immagine: " + err.message);
+      return;
+    }
   }
 
   await db.collection('ads').add({
@@ -95,7 +103,7 @@ async function addAd(){
   loadAds();
 }
 
-// CARICA ANNUNCI
+// FUNZIONE CARICA ANNUNCI
 async function loadAds(){
   const grid = document.getElementById('adGrid');
   grid.innerHTML="";
@@ -148,7 +156,6 @@ window.onload = loadAds;
 </header>
 
 <div class="container">
-  <!-- FORM PUBBLICO -->
   <div class="add-ad-form">
     <h2>Aggiungi il tuo annuncio gratis</h2>
     <form id="adForm" onsubmit="event.preventDefault(); addAd();">
@@ -160,11 +167,9 @@ window.onload = loadAds;
     </form>
   </div>
 
-  <!-- GRIGLIA ANNUNCI -->
   <div class="grid" id="adGrid"></div>
   <div class="pagination" id="pagination"></div>
 
-  <!-- REGOLE SITO -->
   <div class="rules">
     <strong>Regole del sito:</strong><br>
     È vietato pubblicare contenuti illegali, offensivi, diffamatori o in violazione di copyright.<br>
