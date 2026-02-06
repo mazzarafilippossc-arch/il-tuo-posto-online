@@ -5,43 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Il Tuo Posto Online</title>
 <style>
-/* --- BODY & FONT --- */
 body { font-family:'Arial', sans-serif; margin:0; background:#f4f4f9; }
-
-/* --- HERO SECTION --- */
 header {
   height:60vh;
   background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-              url('https://images.unsplash.com/photo-1581091012184-fb6f0ed0e2e3?crop=entropy&cs=tinysrgb&fit=max&w=1080') center/cover no-repeat;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  color:white;
-  text-align:center;
+              url('https://images.unsplash.com/photo-1601758123927-3e20eddf007c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxNjA3fDB8MHwxfHNlYXJjaHwxfHxjdWJlJTIwcmViaXglMjBwb3N0ZXJ8ZW58MHx8fHwxNjg1NjIxMDc4&ixlib=rb-4.0.3&q=80&w=1080') center/cover no-repeat;
+  display:flex; flex-direction:column; justify-content:center; align-items:center; color:white; text-align:center;
 }
-header h1 {
-  font-size:2rem;
-  margin:0;
-  text-shadow:2px 2px 10px rgba(0,0,0,0.5);
-}
+header h1 { font-size:2rem; margin:0; text-shadow:2px 2px 10px rgba(0,0,0,0.5); }
 
-/* --- CONTAINER --- */
 .container { max-width:1100px; margin:20px auto; padding:0 20px; }
 
-/* --- FORM PUBBLICO --- */
 .add-ad-form {
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.1);
-  margin-bottom:30px;
+  background:white; padding:20px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1); margin-bottom:30px;
 }
 .add-ad-form h2 { margin-top:0; color:#333; }
 .add-ad-form input, .add-ad-form textarea { width:100%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
 .add-ad-form button { padding:12px 20px; border:none; border-radius:5px; background:#ff6f61; color:white; font-weight:bold; cursor:pointer; }
 
-/* --- GRIGLIA ANNUNCI --- */
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
 .box { background:white; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); overflow:hidden; display:flex; flex-direction:column; transition:transform 0.2s; }
 .box:hover { transform:translateY(-5px); }
@@ -54,11 +35,9 @@ header h1 {
 .page-btn { margin:0 5px; cursor:pointer; padding:6px 12px; border-radius:5px; border:none; background:#ddd; }
 .page-btn.active { background:#ff6f61; color:white; }
 
-/* --- REGOLE SITO --- */
-.rules { margin:40px 0; background:#fff4f4; padding:15px; border-radius:8px; color:#333; font-size:14px; border:1px solid #ff6f61; }
+.rules { margin:40px 0; background:#fff4f4; padding:15px; border-radius:8px; color:#333; font-size:14px; border:1px solid #ff6f61; text-align:center; }
 </style>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
@@ -82,7 +61,6 @@ let currentPage = 1;
 const adsPerPage = 10;
 let allAds = [];
 
-// 🔹 AGGIUNGI ANNUNCIO PUBBLICO CON IMMAGINE
 async function addAd(){
   const title = document.getElementById('adTitle').value;
   const text = document.getElementById('adText').value;
@@ -93,10 +71,7 @@ async function addAd(){
 
   let imageUrl = "";
   if(imageFile){
-    if(imageFile.size > 5*1024*1024){ // 5 MB
-      alert("Immagine troppo grande! Max 5 MB");
-      return;
-    }
+    if(imageFile.size > 5*1024*1024){ alert("Immagine troppo grande! Max 5 MB"); return; }
     const ref = storage.ref().child('images/'+Date.now()+'-'+imageFile.name);
     await ref.put(imageFile);
     imageUrl = await ref.getDownloadURL();
@@ -104,7 +79,7 @@ async function addAd(){
 
   await db.collection('ads').add({
     title, text, link, image: imageUrl,
-    status: "approved", // direttamente visibile
+    status: "approved",
     created: Date.now()
   });
 
@@ -113,11 +88,9 @@ async function addAd(){
   loadAds();
 }
 
-// 🔹 CARICA ANNUNCI
 async function loadAds(){
   const grid = document.getElementById('adGrid');
   grid.innerHTML="";
-
   const snapshot = await db.collection('ads').where('status','==','approved').orderBy('created','desc').get();
   allAds = snapshot.docs.map(doc => ({id:doc.id, ...doc.data()}));
   showPage(currentPage);
@@ -130,7 +103,6 @@ function showPage(page){
   const start = (page-1)*adsPerPage;
   const end = start+adsPerPage;
   const pageAds = allAds.slice(start,end);
-
   pageAds.forEach(ad=>{
     const div = document.createElement('div');
     div.className="box";
@@ -168,7 +140,6 @@ window.onload = loadAds;
 </header>
 
 <div class="container">
-  <!-- FORM PUBBLICO -->
   <div class="add-ad-form">
     <h2>Aggiungi il tuo annuncio gratis</h2>
     <form id="adForm" onsubmit="event.preventDefault(); addAd();">
@@ -180,7 +151,6 @@ window.onload = loadAds;
     </form>
   </div>
 
-  <!-- GRIGLIA ANNUNCI -->
   <div class="grid" id="adGrid"></div>
   <div class="pagination" id="pagination"></div>
 
@@ -188,7 +158,7 @@ window.onload = loadAds;
   <div style="text-align:center; margin:40px 0;">
     <script type="text/javascript">
 	atOptions = {
-		'key' : 'QUI_LA_TUA_KEY', // inserisci la tua key Adsterra
+		'key' :  'a9b3b799500d579fab35d6eca886645c', // <--- inserisci qui la tua key Adsterra
 		'format' : 'iframe',
 		'height' : 250,
 		'width' : 300,
@@ -198,12 +168,12 @@ window.onload = loadAds;
     <script type="text/javascript" src="//www.adsterra.com/ads.js"></script>
   </div>
 
-  <!-- REGOLE SITO -->
   <div class="rules">
-    <strong>Regole del sito:</strong> <br>
-    È vietato pubblicare contenuti illegali, offensivi, diffamatori o in violazione di copyright. <br>
+    <strong>Regole del sito:</strong><br>
+    È vietato pubblicare contenuti illegali, offensivi, diffamatori o in violazione di copyright.<br>
     Tutti gli annunci pubblicati sono di responsabilità dell’utente, ma ci riserviamo di rimuovere qualsiasi contenuto inappropriato.
   </div>
 </div>
 </body>
 </html>
+
