@@ -6,17 +6,31 @@
 <title>Il Tuo Posto Online</title>
 
 <style>
+/* SFONDO PAC-MAN SU TUTTO IL SITO */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #f3f3f3;
+  background-color: #f4f4f4;
+  background-image: url("https://i.imgur.com/8Qf7Q9B.png");
+  background-repeat: repeat;
+  background-size: 180px;
+}
+
+/* OVERLAY SBIADITO */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.85);
+  z-index: -1;
 }
 
 /* HERO */
 header {
-  height: 60vh;
-  background: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)),
-  url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600") center/cover no-repeat;
+  height: 55vh;
+  background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)),
+    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600")
+    center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,6 +39,7 @@ header {
 
 header h1 {
   font-size: 3rem;
+  margin: 0;
 }
 
 /* CONTENUTO */
@@ -38,9 +53,13 @@ header h1 {
 .form-box {
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,.1);
   margin-bottom: 30px;
+}
+
+.form-box h2 {
+  margin-top: 0;
 }
 
 .form-box input,
@@ -52,13 +71,13 @@ header h1 {
 
 .form-box button {
   padding: 12px;
-  background: #ff6f61;
-  color: white;
+  background: #ffcc00;
   border: none;
+  font-size: 16px;
   cursor: pointer;
 }
 
-/* GRID */
+/* GRIGLIA ANNUNCI */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
@@ -67,9 +86,9 @@ header h1 {
 
 .card {
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,.1);
 }
 
 .card img {
@@ -79,14 +98,22 @@ header h1 {
 }
 
 .card .content {
-  padding: 10px;
+  padding: 12px;
 }
 
+.card a {
+  color: #ff9800;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* REGOLE */
 .rules {
   margin-top: 40px;
   padding: 15px;
-  background: #fff4f4;
-  border: 1px solid #ff6f61;
+  background: #fffbe6;
+  border: 1px solid #ffcc00;
+  border-radius: 10px;
 }
 </style>
 
@@ -113,10 +140,11 @@ const storage = firebase.storage();
 async function pubblica() {
   const titolo = document.getElementById("titolo").value;
   const testo = document.getElementById("testo").value;
+  const link = document.getElementById("link").value;
   const file = document.getElementById("img").files[0];
 
   if (!titolo || !testo) {
-    alert("Compila titolo e descrizione");
+    alert("Titolo e descrizione obbligatori");
     return;
   }
 
@@ -131,6 +159,7 @@ async function pubblica() {
   await db.collection("ads").add({
     title: titolo,
     text: testo,
+    link: link,
     image: imageUrl,
     status: "approved"
   });
@@ -157,6 +186,7 @@ async function carica() {
       <div class="content">
         <h3>${a.title}</h3>
         <p>${a.text}</p>
+        ${a.link ? `<a href="${a.link}" target="_blank">Vai al link</a>` : ""}
       </div>
     `;
     grid.appendChild(div);
@@ -180,18 +210,25 @@ window.onload = carica;
     <form id="form" onsubmit="event.preventDefault(); pubblica();">
       <input id="titolo" placeholder="Titolo">
       <textarea id="testo" placeholder="Descrizione"></textarea>
+      <input id="link" placeholder="Link (facoltativo)">
       <input type="file" id="img" accept="image/*">
       <button>Pubblica</button>
     </form>
   </div>
 
+  <!-- QUI POTRAI METTERE IL BANNER ADSTERRA -->
+  <div style="text-align:center; margin:30px 0;">
+    <!-- INCOLLA QUI IL CODICE PUBBLICITARIO -->
+  </div>
+
   <div class="grid" id="grid"></div>
 
   <div class="rules">
-    Vietati contenuti illegali, offensivi o protetti da copyright.
+    È vietato pubblicare contenuti illegali, offensivi o protetti da copyright.
   </div>
 
 </div>
 
 </body>
 </html>
+
