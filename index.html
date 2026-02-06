@@ -6,60 +6,50 @@
 <title>Il Tuo Posto Online</title>
 
 <style>
-/* SFONDO PAC-MAN SU TUTTO IL SITO */
+/* MATRIX BACKGROUND */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  background-image: url("https://i.imgur.com/8Qf7Q9B.png");
+  background: black;
+  color: #00ff88;
+  background-image: url("https://i.imgur.com/2z9Z1ZC.png");
   background-repeat: repeat;
-  background-size: 180px;
+  background-size: 300px;
 }
 
-/* OVERLAY SBIADITO */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.85);
   z-index: -1;
 }
 
 /* HERO */
 header {
-  height: 55vh;
-  background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)),
-    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600")
-    center/cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
+  padding: 80px 20px;
+  text-align: center;
 }
 
 header h1 {
   font-size: 3rem;
-  margin: 0;
+  color: #00ff88;
 }
 
 /* CONTENUTO */
 .container {
   max-width: 1100px;
-  margin: 30px auto;
-  padding: 0 20px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 /* FORM */
 .form-box {
-  background: white;
+  background: rgba(0,0,0,0.8);
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,.1);
+  border: 1px solid #00ff88;
   margin-bottom: 30px;
-}
-
-.form-box h2 {
-  margin-top: 0;
 }
 
 .form-box input,
@@ -67,17 +57,20 @@ header h1 {
   width: 100%;
   padding: 10px;
   margin: 8px 0;
+  background: black;
+  color: #00ff88;
+  border: 1px solid #00ff88;
 }
 
 .form-box button {
   padding: 12px;
-  background: #ffcc00;
+  background: #00ff88;
+  color: black;
   border: none;
-  font-size: 16px;
   cursor: pointer;
 }
 
-/* GRIGLIA ANNUNCI */
+/* GRID */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
@@ -85,10 +78,10 @@ header h1 {
 }
 
 .card {
-  background: white;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid #00ff88;
   border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,.1);
+  cursor: pointer;
 }
 
 .card img {
@@ -98,22 +91,7 @@ header h1 {
 }
 
 .card .content {
-  padding: 12px;
-}
-
-.card a {
-  color: #ff9800;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-/* REGOLE */
-.rules {
-  margin-top: 40px;
-  padding: 15px;
-  background: #fffbe6;
-  border: 1px solid #ffcc00;
-  border-radius: 10px;
+  padding: 10px;
 }
 </style>
 
@@ -136,20 +114,14 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-/* PUBBLICA ANNUNCIO */
+/* PUBBLICA */
 async function pubblica() {
-  const titolo = document.getElementById("titolo").value;
-  const testo = document.getElementById("testo").value;
-  const link = document.getElementById("link").value;
-  const file = document.getElementById("img").files[0];
-
-  if (!titolo || !testo) {
-    alert("Titolo e descrizione obbligatori");
-    return;
-  }
+  const titolo = titoloEl.value;
+  const testo = testoEl.value;
+  const link = linkEl.value;
+  const file = imgEl.files[0];
 
   let imageUrl = "";
-
   if (file) {
     const ref = storage.ref("images/" + Date.now() + "_" + file.name);
     await ref.put(file);
@@ -164,15 +136,13 @@ async function pubblica() {
     status: "approved"
   });
 
-  document.getElementById("form").reset();
+  form.reset();
   carica();
 }
 
-/* CARICA ANNUNCI */
+/* CARICA */
 async function carica() {
-  const grid = document.getElementById("grid");
   grid.innerHTML = "";
-
   const snap = await db.collection("ads")
     .where("status", "==", "approved")
     .get();
@@ -181,12 +151,14 @@ async function carica() {
     const a = doc.data();
     const div = document.createElement("div");
     div.className = "card";
+    div.onclick = () => {
+      window.location.href = "annuncio.html?id=" + doc.id;
+    };
     div.innerHTML = `
       ${a.image ? `<img src="${a.image}">` : ""}
       <div class="content">
         <h3>${a.title}</h3>
-        <p>${a.text}</p>
-        ${a.link ? `<a href="${a.link}" target="_blank">Vai al link</a>` : ""}
+        <p>${a.text.substring(0,80)}...</p>
       </div>
     `;
     grid.appendChild(div);
@@ -205,30 +177,20 @@ window.onload = carica;
 
 <div class="container">
 
-  <div class="form-box">
-    <h2>Pubblica un annuncio gratis</h2>
-    <form id="form" onsubmit="event.preventDefault(); pubblica();">
-      <input id="titolo" placeholder="Titolo">
-      <textarea id="testo" placeholder="Descrizione"></textarea>
-      <input id="link" placeholder="Link (facoltativo)">
-      <input type="file" id="img" accept="image/*">
-      <button>Pubblica</button>
-    </form>
-  </div>
+<div class="form-box">
+  <h2>Pubblica annuncio</h2>
+  <form id="form" onsubmit="event.preventDefault(); pubblica();">
+    <input id="titoloEl" placeholder="Titolo">
+    <textarea id="testoEl" placeholder="Descrizione"></textarea>
+    <input id="linkEl" placeholder="Link (facoltativo)">
+    <input type="file" id="imgEl">
+    <button>Pubblica</button>
+  </form>
+</div>
 
-  <!-- QUI POTRAI METTERE IL BANNER ADSTERRA -->
-  <div style="text-align:center; margin:30px 0;">
-    <!-- INCOLLA QUI IL CODICE PUBBLICITARIO -->
-  </div>
-
-  <div class="grid" id="grid"></div>
-
-  <div class="rules">
-    È vietato pubblicare contenuti illegali, offensivi o protetti da copyright.
-  </div>
+<div class="grid" id="grid"></div>
 
 </div>
 
 </body>
 </html>
-
