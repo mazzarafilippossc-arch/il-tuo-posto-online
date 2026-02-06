@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -10,9 +10,9 @@ body { font-family:'Arial', sans-serif; margin:0; background:#f4f4f9; }
 
 /* --- HERO SECTION --- */
 header {
-  height: 60vh;
+  height:60vh;
   background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-              url('https://images.unsplash.com/photo-1601758123927-3e20eddf007c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxNjA3fDB8MHwxfHNlYXJjaHwxfHxjdWJlJTIwcmViaXglMjBwb3N0ZXJ8ZW58MHx8fHwxNjg1NjIxMDc4&ixlib=rb-4.0.3&q=80&w=1080') center/cover no-repeat;
+              url('https://images.unsplash.com/photo-1581091012184-fb6f0ed0e2e3?crop=entropy&cs=tinysrgb&fit=max&w=1080') center/cover no-repeat;
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -21,7 +21,7 @@ header {
   text-align:center;
 }
 header h1 {
-  font-size:2.5rem;
+  font-size:2rem;
   margin:0;
   text-shadow:2px 2px 10px rgba(0,0,0,0.5);
 }
@@ -41,7 +41,6 @@ header h1 {
 .add-ad-form input, .add-ad-form textarea { width:100%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
 .add-ad-form button { padding:12px 20px; border:none; border-radius:5px; background:#ff6f61; color:white; font-weight:bold; cursor:pointer; }
 
-<script src="https://www.highperformanceformat.com/a9b3b799500d579fab35d6eca886645c/invoke.js"></script>
 /* --- GRIGLIA ANNUNCI --- */
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
 .box { background:white; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); overflow:hidden; display:flex; flex-direction:column; transition:transform 0.2s; }
@@ -59,6 +58,7 @@ header h1 {
 .rules { margin:40px 0; background:#fff4f4; padding:15px; border-radius:8px; color:#333; font-size:14px; border:1px solid #ff6f61; }
 </style>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
@@ -183,7 +183,21 @@ window.onload = loadAds;
   <!-- GRIGLIA ANNUNCI -->
   <div class="grid" id="adGrid"></div>
   <div class="pagination" id="pagination"></div>
-<script src="https://www.highperformanceformat.com/a9b3b799500d579fab35d6eca886645c/invoke.js"></script>
+
+  <!-- BANNER ADSTERRA -->
+  <div style="text-align:center; margin:40px 0;">
+    <script type="text/javascript">
+	atOptions = {
+		'key' : 'QUI_LA_TUA_KEY', // inserisci la tua key Adsterra
+		'format' : 'iframe',
+		'height' : 250,
+		'width' : 300,
+		'params' : {}
+	};
+    </script>
+    <script type="text/javascript" src="//www.adsterra.com/ads.js"></script>
+  </div>
+
   <!-- REGOLE SITO -->
   <div class="rules">
     <strong>Regole del sito:</strong> <br>
@@ -193,4 +207,3 @@ window.onload = loadAds;
 </div>
 </body>
 </html>
-
